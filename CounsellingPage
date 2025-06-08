@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'utils.dart';
+
+class CounsellingPage extends StatelessWidget {
+  final List<Map<String, String>> hotlines = [
+    //Befrienders Kuala Lumpur
+    {"name": "Mental Health Hotline", "number": "0376272929"},
+    //MIASA Crisis Helpline
+    {"name": "Teen Support Line", "number": "1800180066"},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Counselling Hotlines")),
+      body: ListView.builder(
+        itemCount: hotlines.length,
+        itemBuilder: (context, index) {
+          final hotline = hotlines[index];
+          return Card(
+            margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              leading: Icon(Icons.phone_in_talk, color: Colors.green),
+              title: Text(hotline["name"]!),
+              subtitle: Text(hotline["number"]!),
+              onTap: () => makingPhoneCall(hotline["number"]!),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
