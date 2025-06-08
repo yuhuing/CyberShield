@@ -1,0 +1,55 @@
+import 'package:flutter/material.dart';
+import 'CounsellingPage.dart';
+import 'EducationPage.dart';
+import 'EmergencyCallPage.dart';
+import 'ReportPage.dart';
+
+class _Feature {
+  final String name;
+  final IconData icon;
+  final Widget page;
+  final Color color;
+
+  _Feature(this.name, this.icon, this.page, this.color);
+}
+
+class HomePage extends StatelessWidget {
+  final List<_Feature> features = [
+    _Feature("Emergency Call", Icons.warning, EmergencyCallPage(), Colors.redAccent),
+    _Feature("Counselling Hotlines", Icons.support_agent, CounsellingPage(), Colors.green),
+    _Feature("Education", Icons.book, EducationPage(), Colors.blue),
+    _Feature("Report Cyberbullying", Icons.report, ReportPage(), Colors.deepOrange),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("CyberShield")),
+      body: ListView.builder(
+        padding: EdgeInsets.all(12),
+        itemCount: features.length,
+        itemBuilder: (context, index) {
+          final feature = features[index];
+          return Card(
+            elevation: 4,
+            margin: EdgeInsets.symmetric(vertical: 8),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              leading: CircleAvatar(
+                backgroundColor: feature.color.withOpacity(0.2),
+                child: Icon(feature.icon, color: feature.color),
+              ),
+              title: Text(feature.name, style: TextStyle(fontWeight: FontWeight.w600)),
+              trailing: Icon(Icons.arrow_forward_ios, size: 18),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => feature.page),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
