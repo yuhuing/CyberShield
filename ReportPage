@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+
+class ReportPage extends StatelessWidget {
+  final TextEditingController _controller = TextEditingController();
+
+  void _submitReport(BuildContext context) {
+    final reportText = _controller.text.trim();
+    if (reportText.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Report submitted. Thank you!")),
+      );
+      _controller.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Report Cyberbullying")),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              maxLines: 6,
+              decoration: InputDecoration(
+                labelText: "Describe the incident",
+                hintText: "Give details of what happened...",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () => _submitReport(context),
+              icon: Icon(Icons.send),
+              label: Text("Submit Report"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
