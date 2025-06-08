@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+
+class EducationPage extends StatelessWidget {
+  final List<String> topics = [
+    "What is Cyberbullying?",
+    "Types of Cyberbullying",
+    "How to Protect Yourself",
+    "How to Report Cyberbullying",
+  ];
+
+  final Map<String, String> details = {
+    "What is Cyberbullying?":
+        "Cyberbullying is bullying that takes place over digital devices like phones or computers.",
+    "Types of Cyberbullying":
+        "Includes harassment, impersonation, doxxing, exclusion, and more.",
+    "How to Protect Yourself":
+        "Do not share personal info, block bullies, and report abusive content.",
+    "How to Report Cyberbullying":
+        "Use in-app reporting tools or contact local authorities.",
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Education")),
+      body: ListView.builder(
+        padding: EdgeInsets.all(12),
+        itemCount: topics.length,
+        itemBuilder: (context, index) {
+          String topic = topics[index];
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 6),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ExpansionTile(
+              leading: Icon(Icons.info_outline, color: Colors.blue),
+              title: Text(topic, style: TextStyle(fontWeight: FontWeight.w600)),
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(details[topic]!),
+                )
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
