@@ -1,0 +1,418 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  final DateTime timestamp;
+
+  ChatMessage({
+    required this.text,
+    required this.isUser,
+    required this.timestamp,
+  });
+}
+
+class ChatbotWidget extends StatefulWidget {
+  const ChatbotWidget({super.key});
+
+  @override
+  State<ChatbotWidget> createState() => _ChatbotWidgetState();
+}
+
+class _ChatbotWidgetState extends State<ChatbotWidget> {
+  final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final List<ChatMessage> _messages = [];
+  bool _isTyping = false;
+
+  // Consistent design tokens
+  static const Color _primaryColor = Color(0xFF2196F3);
+  static const Color _primaryLight = Color(0xFFE3F2FD);
+  static const Color _surfaceColor = Color(0xFFFAFAFA);
+  static const Color _cardColor = Color(0xFFFFFFFF);
+  static const Color _borderColor = Color(0xFFE0E0E0);
+  static const Color _textPrimary = Color(0xFF212121);
+  static const Color _textSecondary = Color(0xFF757575);
+  static const double _borderRadius = 12.0;
+  static const double _spacing = 16.0;
+  static const double _spacingSmall = 8.0;
+  static const double _spacingLarge = 24.0;
+
+  // Pre-defined responses for the chatbot
+  final Map<String, List<String>> _responses = {
+    'greeting': [
+      "Hello! I'm here to support you. How are you feeling today?",
+      "Hi there! I'm your confidential support companion. What's on your mind?",
+      "Welcome! I'm here to listen and help. What would you like to talk about?",
+    ],
+    'cyberbullying': [
+      "I'm so sorry you're experiencing this. Cyberbullying is never okay, and it's not your fault. Can you tell me more about what's happening?",
+      "That sounds really difficult. You don't deserve to be treated this way. Have you considered talking to a trusted adult about this?",
+      "I hear you, and I believe you. This is serious and you shouldn't have to deal with it alone. What would feel most helpful right now?",
+    ],
+    'sad': [
+      "I can hear that you're feeling really down. It's okay to feel this way. Would you like to talk about what's making you feel sad?",
+      "I'm here for you. Feeling sad is a normal human emotion, but you don't have to go through it alone. What's been happening?",
+      "That sounds really hard. It's okay to not be okay. Is there someone in your life you feel comfortable talking to about this?",
+    ],
+    'anxious': [
+      "Anxiety can feel really overwhelming. Let's take a deep breath together. What's making you feel anxious right now?",
+      "I understand anxiety can be really scary. You're not alone in feeling this way. Can you tell me more about what's worrying you?",
+      "It sounds like you're dealing with a lot of anxiety. That's really tough. Have you tried any breathing exercises or grounding techniques?",
+    ],
+    'help': [
+      "I'm here to help! You can talk to me about anything that's bothering you. What's on your mind?",
+      "I want to support you. Whether it's cyberbullying, stress, or anything else, I'm here to listen. What would you like to discuss?",
+      "I'm your confidential support companion. You can share as much or as little as you're comfortable with. What's happening?",
+    ],
+    'escalate': [
+      "I'm concerned about what you're sharing. Would you like to talk to a human counselor? They can provide more specific support.",
+      "This sounds like something that would benefit from talking to a professional. Should I help you find resources for human support?",
+      "I want to make sure you get the best support possible. Would you be open to speaking with a trained counselor?",
+    ],
+    'default': [
+      "I hear you. Can you tell me more about how you're feeling?",
+      "Thank you for sharing that with me. How can I best support you right now?",
+      "I'm listening. What would be most helpful for you to talk about?",
+    ],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    // Send initial greeting
+    _addBotMessage(_getRandomResponse('greeting'));
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  String _getRandomResponse(String category) {
+    final responses = _responses[category] ?? _responses['default']!;
+    return responses[DateTime.now().millisecond % responses.length];
+  }
+
+  void _addBotMessage(String text) {
+    setState(() {
+      _messages.add(
+        ChatMessage(text: text, isUser: false, timestamp: DateTime.now()),
+      );
+    });
+    _scrollToBottom();
+  }
+
+  void _addUserMessage(String text) {
+    setState(() {
+      _messages.add(
+        ChatMessage(text: text, isUser: true, timestamp: DateTime.now()),
+      );
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  String _analyzeMessage(String message) {
+    final lowerMessage = message.toLowerCase();
+
+    // Check for cyberbullying keywords
+    if (lowerMessage.contains('bully') ||
+        lowerMessage.contains('harass') ||
+        lowerMessage.contains('threat') ||
+        lowerMessage.contains('mean') ||
+        lowerMessage.contains('hurtful') ||
+        lowerMessage.contains('online') ||
+        lowerMessage.contains('social media')) {
+      return 'cyberbullying';
+    }
+
+    // Check for emotional states
+    if (lowerMessage.contains('sad') ||
+        lowerMessage.contains('depressed') ||
+        lowerMessage.contains('hopeless') ||
+        lowerMessage.contains('worthless')) {
+      return 'sad';
+    }
+
+    if (lowerMessage.contains('anxious') ||
+        lowerMessage.contains('worried') ||
+        lowerMessage.contains('nervous') ||
+        lowerMessage.contains('scared') ||
+        lowerMessage.contains('panic')) {
+      return 'anxious';
+    }
+
+    if (lowerMessage.contains('help') ||
+        lowerMessage.contains('support') ||
+        lowerMessage.contains('need')) {
+      return 'help';
+    }
+
+    return 'default';
+  }
+
+  void _handleUserMessage(String message) {
+    if (message.trim().isEmpty) return;
+
+    _addUserMessage(message);
+    _textController.clear();
+
+    // Show typing indicator
+    setState(() {
+      _isTyping = true;
+    });
+
+    // Simulate bot thinking time
+    Timer(const Duration(milliseconds: 1500), () {
+      setState(() {
+        _isTyping = false;
+      });
+
+      // Analyze message and respond
+      final category = _analyzeMessage(message);
+      String response = _getRandomResponse(category);
+
+      // Occasionally suggest escalation for serious topics
+      if (category == 'cyberbullying' && DateTime.now().millisecond % 3 == 0) {
+        response += '\n\n' + _getRandomResponse('escalate');
+      }
+
+      _addBotMessage(response);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _surfaceColor,
+      appBar: AppBar(
+        title: const Text(
+          'Chat Support',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2C3E50),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2C3E50),
+        elevation: 0,
+        shadowColor: Colors.black.withOpacity(0.1),
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Color(0xFF2C3E50),
+            size: 24,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
+        children: [
+          // Chat messages
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(_spacing),
+              itemCount: _messages.length + (_isTyping ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == _messages.length && _isTyping) {
+                  return _buildTypingIndicator();
+                }
+
+                final message = _messages[index];
+                return _buildMessageBubble(message);
+              },
+            ),
+          ),
+
+          // Input area
+          Container(
+            padding: const EdgeInsets.all(_spacing),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              border: Border(top: BorderSide(color: _borderColor, width: 1)),
+            ),
+            child: SafeArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _surfaceColor,
+                        borderRadius: BorderRadius.circular(_borderRadius),
+                        border: Border.all(color: _borderColor),
+                      ),
+                      child: TextField(
+                        controller: _textController,
+                        decoration: InputDecoration(
+                          hintText: 'Type your message...',
+                          hintStyle: TextStyle(color: _textSecondary),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: _spacing,
+                            vertical: 12,
+                          ),
+                        ),
+                        maxLines: null,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: _handleUserMessage,
+                        style: TextStyle(color: _textPrimary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: _spacingSmall),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: _primaryColor,
+                      borderRadius: BorderRadius.circular(_borderRadius),
+                    ),
+                    child: IconButton(
+                      onPressed: () => _handleUserMessage(_textController.text),
+                      icon: const Icon(Icons.send, color: Colors.white),
+                      padding: const EdgeInsets.all(12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageBubble(ChatMessage message) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: _spacing),
+      child: Row(
+        mainAxisAlignment:
+            message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!message.isUser) ...[
+            Container(
+              padding: const EdgeInsets.all(_spacingSmall),
+              decoration: BoxDecoration(
+                color: _primaryLight,
+                borderRadius: BorderRadius.circular(_borderRadius),
+              ),
+              child: Icon(Icons.psychology, color: _primaryColor, size: 16),
+            ),
+            const SizedBox(width: _spacingSmall),
+          ],
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(_spacing),
+              decoration: BoxDecoration(
+                color: message.isUser ? _primaryColor : _cardColor,
+                borderRadius: BorderRadius.circular(_borderRadius),
+                border:
+                    message.isUser
+                        ? null
+                        : Border.all(color: _borderColor, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                message.text,
+                style: TextStyle(
+                  color: message.isUser ? Colors.white : _textPrimary,
+                  fontSize: 16,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ),
+          if (message.isUser) ...[
+            const SizedBox(width: _spacingSmall),
+            Container(
+              padding: const EdgeInsets.all(_spacingSmall),
+              decoration: BoxDecoration(
+                color: _surfaceColor,
+                borderRadius: BorderRadius.circular(_borderRadius),
+                border: Border.all(color: _borderColor),
+              ),
+              child: Icon(Icons.person, color: _textSecondary, size: 16),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: _spacing),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(_spacingSmall),
+            decoration: BoxDecoration(
+              color: _primaryLight,
+              borderRadius: BorderRadius.circular(_borderRadius),
+            ),
+            child: Icon(Icons.psychology, color: _primaryColor, size: 16),
+          ),
+          const SizedBox(width: _spacingSmall),
+          Container(
+            padding: const EdgeInsets.all(_spacing),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(_borderRadius),
+              border: Border.all(color: _borderColor, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Typing',
+                  style: TextStyle(color: _textSecondary, fontSize: 16),
+                ),
+                const SizedBox(width: _spacingSmall),
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
