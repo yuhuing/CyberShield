@@ -1,0 +1,435 @@
+import 'package:flutter/material.dart';
+
+class Question {
+  final String text;
+  final List<String> options;
+  final String? explanation;
+
+  Question({required this.text, required this.options, this.explanation});
+}
+
+class EducationWidget extends StatefulWidget {
+  const EducationWidget({super.key});
+
+  @override
+  State<EducationWidget> createState() => _EducationWidgetState();
+}
+
+class _EducationWidgetState extends State<EducationWidget> {
+  int _currentQuestionIndex = 0;
+  List<int> _answers = [];
+  bool _showResults = false;
+  int _score = 0;
+
+  // Design constants for consistency
+  static const double _borderRadius = 12.0;
+  static const double _standardPadding = 20.0;
+  static const double _itemSpacing = 16.0;
+  static const double _smallSpacing = 8.0;
+  static const double _largeSpacing = 24.0;
+
+  final List<Question> _questions = [
+    Question(
+      text: "Was the message or behavior repeated over time?",
+      options: ["Yes", "No", "I'm not sure"],
+      explanation:
+          "Cyberbullying often involves repeated behavior over time, not just a one-time incident.",
+    ),
+    Question(
+      text: "Did the message make you feel scared, worthless, or powerless?",
+      options: ["Yes", "No", "Sometimes"],
+      explanation:
+          "The emotional impact is a key indicator of bullying behavior.",
+    ),
+    Question(
+      text: "Was the message sent with the intent to harm or embarrass you?",
+      options: ["Yes", "No", "I'm not sure"],
+      explanation: "Intent to harm is a defining characteristic of bullying.",
+    ),
+    Question(
+      text: "Did the person have more power or influence than you?",
+      options: ["Yes", "No", "Maybe"],
+      explanation: "Power imbalance is often present in bullying situations.",
+    ),
+    Question(
+      text: "Did the behavior happen in a public space where others could see?",
+      options: ["Yes", "No", "Somewhat"],
+      explanation: "Public humiliation is a common tactic in cyberbullying.",
+    ),
+    Question(
+      text: "Have you asked the person to stop, but they continued?",
+      options: ["Yes", "No", "I haven't asked them to stop"],
+      explanation:
+          "Ignoring requests to stop is a strong indicator of bullying.",
+    ),
+    Question(
+      text: "Did the behavior affect your daily life or mental health?",
+      options: ["Yes, significantly", "Somewhat", "No"],
+      explanation: "The impact on your well-being is important to consider.",
+    ),
+    Question(
+      text:
+          "Were you targeted because of your identity, beliefs, or characteristics?",
+      options: ["Yes", "No", "I'm not sure"],
+      explanation:
+          "Targeted harassment based on personal characteristics is a form of bullying.",
+    ),
+  ];
+
+  void _answerQuestion(int answerIndex) {
+    setState(() {
+      _answers.add(answerIndex);
+
+      if (_currentQuestionIndex < _questions.length - 1) {
+        _currentQuestionIndex++;
+      } else {
+        _calculateResults();
+        _showResults = true;
+      }
+    });
+  }
+
+  void _calculateResults() {
+    _score = 0;
+    for (int i = 0; i < _answers.length; i++) {
+      if (_answers[i] == 0) {
+        // "Yes" answers
+        _score += 2;
+      } else if (_answers[i] == 1) {
+        // "No" answers
+        _score += 0;
+      } else {
+        // "Sometimes/I'm not sure" answers
+        _score += 1;
+      }
+    }
+  }
+
+  void _resetQuiz() {
+    setState(() {
+      _currentQuestionIndex = 0;
+      _answers = [];
+      _showResults = false;
+      _score = 0;
+    });
+  }
+
+  String _getResultMessage() {
+    final maxScore = _questions.length * 2;
+    final percentage = (_score / maxScore) * 100;
+
+    if (percentage >= 70) {
+      return "This appears to be cyberbullying. You should seek help and support.";
+    } else if (percentage >= 40) {
+      return "This may be cyberbullying. Consider talking to someone you trust.";
+    } else {
+      return "This doesn't appear to be cyberbullying, but if you're concerned, talk to someone.";
+    }
+  }
+
+  Color _getResultColor() {
+    final maxScore = _questions.length * 2;
+    final percentage = (_score / maxScore) * 100;
+
+    if (percentage >= 70) {
+      return Colors.red[600]!;
+    } else if (percentage >= 40) {
+      return Colors.orange[600]!;
+    } else {
+      return Colors.green[600]!;
+    }
+  }
+
+  // Consistent container builder
+  Widget _buildContainer({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(_standardPadding),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(_borderRadius),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          'Education',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2C3E50),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2C3E50),
+        elevation: 0,
+        shadowColor: Colors.black.withOpacity(0.1),
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Color(0xFF2C3E50),
+            size: 24,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: _showResults ? _buildResults() : _buildQuestion(),
+    );
+  }
+
+  Widget _buildQuestion() {
+    final question = _questions[_currentQuestionIndex];
+
+    return Padding(
+      padding: const EdgeInsets.all(_standardPadding),
+      child: Column(
+        children: [
+          // Progress indicator
+          _buildContainer(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${((_currentQuestionIndex + 1) / _questions.length * 100).round()}%',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[600],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: _itemSpacing),
+                LinearProgressIndicator(
+                  value: (_currentQuestionIndex + 1) / _questions.length,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green[600]!),
+                  minHeight: 6,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: _itemSpacing),
+
+          // Question
+          _buildContainer(
+            child: Row(
+              children: [
+                Icon(Icons.help_outline, color: Colors.green[600], size: 24),
+                const SizedBox(width: _itemSpacing),
+                Expanded(
+                  child: Text(
+                    question.text,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: _itemSpacing),
+
+          // Answer options
+          Expanded(
+            child: ListView.builder(
+              itemCount: question.options.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: _itemSpacing),
+                  child: GestureDetector(
+                    onTap: () => _answerQuestion(index),
+                    child: _buildContainer(
+                      child: Row(
+                        children: [
+                          Radio<int>(
+                            value: index,
+                            groupValue: null,
+                            onChanged: (_) => _answerQuestion(index),
+                            activeColor: Colors.green[600],
+                          ),
+                          const SizedBox(width: _itemSpacing),
+                          Expanded(
+                            child: Text(
+                              question.options[index],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResults() {
+    return Padding(
+      padding: const EdgeInsets.all(_standardPadding),
+      child: Column(
+        children: [
+          // Results header
+          _buildContainer(
+            child: Column(
+              children: [
+                Icon(Icons.assessment, color: _getResultColor(), size: 48),
+                const SizedBox(height: _itemSpacing),
+                Text(
+                  'Assessment Complete',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: _getResultColor(),
+                  ),
+                ),
+                const SizedBox(height: _smallSpacing),
+                Text(
+                  _getResultMessage(),
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: _itemSpacing),
+
+          // Score breakdown
+          Expanded(
+            child: _buildContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Your Responses:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: _itemSpacing),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _questions.length,
+                      itemBuilder: (context, index) {
+                        final question = _questions[index];
+                        final answer = _answers[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: _itemSpacing),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${index + 1}. ${question.text}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: _smallSpacing / 2),
+                              Text(
+                                'Answer: ${question.options[answer]}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              if (question.explanation != null) ...[
+                                const SizedBox(height: _smallSpacing / 2),
+                                Text(
+                                  'Note: ${question.explanation}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                              if (index < _questions.length - 1)
+                                const Divider(height: _itemSpacing),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: _itemSpacing),
+
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _resetQuiz,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Take Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: _itemSpacing),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(_borderRadius),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: _itemSpacing),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.home),
+                  label: const Text('Go Home'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[600],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: _itemSpacing),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(_borderRadius),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
