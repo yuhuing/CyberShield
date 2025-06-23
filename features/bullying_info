@@ -306,7 +306,7 @@ class _BullyingInfoPageState extends State<BullyingInfoPage>
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Real-Life Example Cases',
+                                            'Example Scenarios of Cyberbullying',
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -315,7 +315,7 @@ class _BullyingInfoPageState extends State<BullyingInfoPage>
                                           ),
                                           SizedBox(height: 4),
                                           Text(
-                                            'Read realistic stories about bullying situations and understand their key characteristics.',
+                                            'Read stories about bullying situations and understand their key characteristics.',
                                             style: TextStyle(
                                               fontSize: 14,
                                               color: lightSlate,
