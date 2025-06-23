@@ -1,0 +1,72 @@
+import 'package:google_generative_ai/google_generative_ai.dart';
+
+class AIService {
+  static const String _apiKey = 'AIzaSyDrI0uQ3YE0Gc8Mg-21aXadE9OS47TRRMk';
+  // --------------------------------
+
+  late final GenerativeModel _model;
+
+  AIService() {
+    print(
+      'AIService: Initializing with API key: ${_apiKey.substring(0, 10)}...',
+    );
+    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
+    print('AIService: Model initialized successfully');
+  }
+
+  // Test method to verify API connection
+  Future<bool> testConnection() async {
+    try {
+      print('AIService: Testing API connection...');
+      final response = await _model.generateContent([
+        Content.text(
+          'Hello, this is a test. Please respond with "API is working!"',
+        ),
+      ]);
+      final text = response.text;
+      print('AIService: API Response: $text');
+      return text != null && text.contains('API is working');
+    } catch (e) {
+      print('AIService: API Test Failed - $e');
+      return false;
+    }
+  }
+
+  Future<String> getResponse(String userInput) async {
+    if (_apiKey.startsWith('YOUR_API_KEY')) {
+      return "Hello! Please add your API key in lib/services/ai_service.dart to enable the AI chatbot.";
+    }
+
+    print(
+      'AIService: Sending message to Gemini API: "${userInput.substring(0, userInput.length > 50 ? 50 : userInput.length)}..."',
+    );
+
+    try {
+      // Create a system prompt
+      final systemPrompt =
+          '''You are a friendly and supportive mental health assistant for an app called MoodNest. Your purpose is to help users who are feeling down, anxious, or are victims of cyberbullying. Provide comfort, encouragement, and helpful, safe advice. Keep your responses concise, empathetic, and easy to understand. Do not provide medical advice. If the user mentions self-harm, immediately provide a hotline number and encourage them to call.
+
+User message: $userInput''';
+
+      print('AIService: Calling Gemini API...');
+      final response = await _model.generateContent([
+        Content.text(systemPrompt),
+      ]);
+      final text = response.text;
+
+      print('AIService: Received response from Gemini API');
+
+      if (text == null) {
+        print('AIService: Response was null');
+        return 'I am not sure how to respond to that. Could you try rephrasing?';
+      }
+
+      print('AIService: Response length: ${text.length} characters');
+      return text;
+    } catch (e) {
+      // You can add more sophisticated error handling here.
+      print('AIService: Error getting response from AI: $e');
+      return 'Sorry, something went wrong. I am unable to respond right now. Error: $e';
+    }
+  }
+}
