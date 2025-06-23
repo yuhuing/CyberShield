@@ -408,6 +408,13 @@ class _BullyingInfoPageState extends State<BullyingInfoPage>
   }
 
   Widget _buildStatisticsCard() {
+    final stats = [
+      {'value': '52%', 'label': 'Teens Experienced Cyberbullying'},
+      {'value': '#2 in Asia', 'label': 'Youth Cyberbullying Rank'},
+      {'value': '8,339', 'label': 'Complaints in 2024 (MCMC)'},
+      {'value': '> 1/3', 'label': 'Youth Victims (Global Survey)'},
+    ];
+
     return _buildEnhancedCard(
       icon: Icons.bar_chart,
       iconColor: warningRed,
@@ -431,7 +438,7 @@ class _BullyingInfoPageState extends State<BullyingInfoPage>
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
-                  'Key Statistics',
+                  'Cyberbullying Statistics (Malaysia)',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -442,26 +449,22 @@ class _BullyingInfoPageState extends State<BullyingInfoPage>
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatItem('1 in 4', 'Students experience bullying'),
-              ),
-              const SizedBox(width: 12),
-              Expanded(child: _buildStatItem('37%', 'Report cyberbullying')),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatItem('70%', 'Witness bullying at school'),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildStatItem('24/7', 'Cyberbullying can happen'),
-              ),
-            ],
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: stats.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.9,
+            ),
+            itemBuilder: (context, index) {
+              return _buildStatItem(
+                stats[index]['value']!,
+                stats[index]['label']!,
+              );
+            },
           ),
         ],
       ),
@@ -470,30 +473,36 @@ class _BullyingInfoPageState extends State<BullyingInfoPage>
 
   Widget _buildStatItem(String number, String description) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        color: cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: warningRed.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: warningRed.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             number,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: warningRed,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
-              color: lightSlate,
-              height: 1.3,
+          const SizedBox(height: 8),
+          Flexible(
+            child: Text(
+              description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: slate, height: 1.3),
             ),
           ),
         ],
